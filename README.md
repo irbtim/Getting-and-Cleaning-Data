@@ -10,11 +10,11 @@ R script does the following.
 
 
 
-~1. Merges the training and the test sets to create one data set.
+###1. Merges the training and the test sets to create one data set.
 
-`Read in the data from files
+Read in the data from files
 
-features <- read.table('./features.txt',header=FALSE)
+`features <- read.table('./features.txt',header=FALSE)
 activityType <- read.table('./activity_labels.txt',header=FALSE)
 subjectTrain <- read.table('./train/subject_train.txt',header=FALSE)
 subjectTest <- read.table('./test/subject_test.txt',header=FALSE)
@@ -45,7 +45,7 @@ colNames  = colnames(dataSet)
 
 
 
--2. Extracts only the measurements on the mean and standard deviation for each measurement.
+2. Extracts only the measurements on the mean and standard deviation for each measurement.
 
 Create a lVector with TRUE values for the ID, mean() & stddev() columns and FALSE for others
 
