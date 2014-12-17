@@ -1,70 +1,106 @@
-==================================================================
-Human Activity Recognition Using Smartphones Dataset
-Version 1.0
-==================================================================
-Jorge L. Reyes-Ortiz, Davide Anguita, Alessandro Ghio, Luca Oneto.
-Smartlab - Non Linear Complex Systems Laboratory
-DITEN - Universitа degli Studi di Genova.
-Via Opera Pia 11A, I-16145, Genoa, Italy.
-activityrecognition@smartlab.ws
-www.smartlab.ws
-==================================================================
+# data for the project: https://d396qusza40orc.cloudfront.net/getdata%2Fprojectfiles%2FUCI%20HAR%20Dataset.zip
+# R script does the following. 
+# 1. Merges the training and the test sets to create one data set.
+# 2. Extracts only the measurements on the mean and standard deviation for each measurement. 
+# 3. Uses descriptive activity names to name the activities in the data set
+# 4. Appropriately labels the data set with descriptive variable names. 
+# 5. From the data set in step 4, creates a second, independent tidy data set with the average of each variable for each activity and each subject.
 
-The experiments have been carried out with a group of 30 volunteers within an age bracket of 19-48 years. Each person performed six activities (WALKING, WALKING_UPSTAIRS, WALKING_DOWNSTAIRS, SITTING, STANDING, LAYING) wearing a smartphone (Samsung Galaxy S II) on the waist. Using its embedded accelerometer and gyroscope, we captured 3-axial linear acceleration and 3-axial angular velocity at a constant rate of 50Hz. The experiments have been video-recorded to label the data manually. The obtained dataset has been randomly partitioned into two sets, where 70% of the volunteers was selected for generating the training data and 30% the test data. 
 
-The sensor signals (accelerometer and gyroscope) were pre-processed by applying noise filters and then sampled in fixed-width sliding windows of 2.56 sec and 50% overlap (128 readings/window). The sensor acceleration signal, which has gravitational and body motion components, was separated using a Butterworth low-pass filter into body acceleration and gravity. The gravitational force is assumed to have only low frequency components, therefore a filter with 0.3 Hz cutoff frequency was used. From each window, a vector of features was obtained by calculating variables from the time and frequency domain. See 'features_info.txt' for more details. 
 
-For each record it is provided:
-======================================
+# 1. Merges the training and the test sets to create one data set.
 
-- Triaxial acceleration from the accelerometer (total acceleration) and the estimated body acceleration.
-- Triaxial Angular velocity from the gyroscope. 
-- A 561-feature vector with time and frequency domain variables. 
-- Its activity label. 
-- An identifier of the subject who carried out the experiment.
+# Read in the data from files
 
-The dataset includes the following files:
-=========================================
+features <- read.table('./features.txt',header=FALSE)
+activityType <- read.table('./activity_labels.txt',header=FALSE)
+subjectTrain <- read.table('./train/subject_train.txt',header=FALSE)
+subjectTest <- read.table('./test/subject_test.txt',header=FALSE)
+xTrain <- read.table('./train/x_train.txt',header=FALSE)
+xTest <- read.table('./test/x_test.txt',header=FALSE)
+yTrain <- read.table('./train/y_train.txt',header=FALSE)
+yTest <- read.table('./test/y_test.txt',header=FALSE)
 
-- 'README.txt'
+# Assigin column names to the imported data
 
-- 'features_info.txt': Shows information about the variables used on the feature vector.
+colnames(activityType) <- c('activityId','activityType')
+colnames(subjectTrain) <- "subjectId"
+colnames(subjectTest) <- "subjectId"
+colnames(xTrain) <- features[,2]
+colnames(xTest) <- features[,2]
+colnames(yTrain) <- "activityId"
+colnames(yTest) <- "activityId"
 
-- 'features.txt': List of all features.
+# Create the final training data set & test data set
 
-- 'activity_labels.txt': Links the class labels with their activity name.
+trainingSet <- cbind(yTrain,subjectTrain,xTrain)
+testSet <- cbind(yTest,subjectTest,xTest)
 
-- 'train/X_train.txt': Training set.
+# Combine training set and test set
 
-- 'train/y_train.txt': Training labels.
+dataSet <- rbind(trainingSet,testSet)
+colNames  = colnames(dataSet)
 
-- 'test/X_test.txt': Test set.
 
-- 'test/y_test.txt': Test labels.
 
-The following files are available for the train and test data. Their descriptions are equivalent. 
+# 2. Extracts only the measurements on the mean and standard deviation for each measurement.
 
-- 'train/subject_train.txt': Each row identifies the subject who performed the activity for each window sample. Its range is from 1 to 30. 
+#Create a lVector with TRUE values for the ID, mean() & stddev() columns and FALSE for others
 
-- 'train/Inertial Signals/total_acc_x_train.txt': The acceleration signal from the smartphone accelerometer X axis in standard gravity units 'g'. Every row shows a 128 element vector. The same description applies for the 'total_acc_x_train.txt' and 'total_acc_z_train.txt' files for the Y and Z axis. 
+v<-(grepl("activity..",colNames) | grepl("subject..",colNames) | grepl("-mean..",colNames) & !grepl("-meanFreq..",colNames) & !grepl("mean..-",colNames) | grepl("-std..",colNames) & !grepl("-std()..-",colNames))
+dataSet <- dataSet[v==TRUE]
 
-- 'train/Inertial Signals/body_acc_x_train.txt': The body acceleration signal obtained by subtracting the gravity from the total acceleration. 
 
-- 'train/Inertial Signals/body_gyro_x_train.txt': The angular velocity vector measured by the gyroscope for each window sample. The units are radians/second. 
 
-Notes: 
-======
-- Features are normalized and bounded within [-1,1].
-- Each feature vector is a row on the text file.
+# 3. Uses descriptive activity names to name the activities in the data set.
 
-For more information about this dataset contact: activityrecognition@smartlab.ws
+# Merge the dataSet with the acitivityType
 
-License:
-========
-Use of this dataset in publications must be acknowledged by referencing the following publication [1] 
+dataSet <- merge(dataSet,activityType,by='activityId',all.x=TRUE)
+colNames  = colnames(dataSet)
 
-[1] Davide Anguita, Alessandro Ghio, Luca Oneto, Xavier Parra and Jorge L. Reyes-Ortiz. Human Activity Recognition on Smartphones using a Multiclass Hardware-Friendly Support Vector Machine. International Workshop of Ambient Assisted Living (IWAAL 2012). Vitoria-Gasteiz, Spain. Dec 2012
 
-This dataset is distributed AS-IS and no responsibility implied or explicit can be addressed to the authors or their institutions for its use or misuse. Any commercial use is prohibited.
 
-Jorge L. Reyes-Ortiz, Alessandro Ghio, Luca Oneto, Davide Anguita. November 2012.
+# 4. Appropriately labels the data set with descriptive variable names.
+
+# Cleaning up names
+
+for (i in 1:length(colNames)) 
+{ 
+  colNames[i] <- gsub("\\()","",colNames[i])
+  colNames[i] <- gsub("-std$","StdDev",colNames[i])
+  colNames[i] <- gsub("-mean","Mean",colNames[i])
+  colNames[i] <- gsub("^(t)","time",colNames[i])
+  colNames[i] <- gsub("^(f)","freq",colNames[i])
+  colNames[i] <- gsub("([Gg]ravity)","Gravity",colNames[i])
+  colNames[i] <- gsub("([Bb]ody[Bb]ody|[Bb]ody)","Body",colNames[i])
+  colNames[i] <- gsub("[Gg]yro","Gyro",colNames[i])
+  colNames[i] <- gsub("AccMag","AccMagnitude",colNames[i])
+  colNames[i] <- gsub("([Bb]odyaccjerkmag)","BodyAccJerkMagnitude",colNames[i])
+  colNames[i] <- gsub("JerkMag","JerkMagnitude",colNames[i])
+  colNames[i] <- gsub("GyroMag","GyroMagnitude",colNames[i])
+}
+
+# Assigning the new column names for the dataSet
+
+colnames(dataSet) <- colNames
+
+# 5. From the data set in step 4, creates a second, independent tidy data set with the average of each variable for each activity and each subject.
+
+# Create a new table, noActivity column
+
+noActivity <- dataSet[,names(dataSet) != 'activityType']
+
+# Aggregate the table to include the mean of each variable for each activity and each subject
+
+aggregateData <- aggregate(noActivity[,names(noActivity) != c('activityId','subjectId')],by=list(activityId=noActivity$activityId,subjectId = noActivity$subjectId),mean)
+
+
+# Merging the aggregateData with activityType to include acitvity names
+
+aggregateData <- merge(aggregateData,activityType,by='activityId',all.x=TRUE)
+
+
+# Export the aggregateData
+ 
+write.table(aggregateData, './tidyData.txt',row.names=TRUE,sep='\t')
