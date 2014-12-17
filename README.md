@@ -10,9 +10,9 @@ R script does the following.
 
 
 
-1. Merges the training and the test sets to create one data set.
+~1. Merges the training and the test sets to create one data set.
 
-Read in the data from files
+`Read in the data from files
 
 features <- read.table('./features.txt',header=FALSE)
 activityType <- read.table('./activity_labels.txt',header=FALSE)
