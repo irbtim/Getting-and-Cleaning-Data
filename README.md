@@ -45,9 +45,9 @@ colNames  = colnames(dataSet)
 
 
 
-2. Extracts only the measurements on the mean and standard deviation for each measurement.
+-2. Extracts only the measurements on the mean and standard deviation for each measurement.
 
-#Create a lVector with TRUE values for the ID, mean() & stddev() columns and FALSE for others
+Create a lVector with TRUE values for the ID, mean() & stddev() columns and FALSE for others
 
 v<-(grepl("activity..",colNames) | grepl("subject..",colNames) | grepl("-mean..",colNames) & !grepl("-meanFreq..",colNames) & !grepl("mean..-",colNames) | grepl("-std..",colNames) & !grepl("-std()..-",colNames))
 dataSet <- dataSet[v==TRUE]
