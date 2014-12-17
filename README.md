@@ -14,7 +14,7 @@ R script does the following.
 
 Read in the data from files
 
-`features <- read.table('./features.txt',header=FALSE)
+`features <- read.table('./features.txt',header=FALSE)`
 activityType <- read.table('./activity_labels.txt',header=FALSE)
 subjectTrain <- read.table('./train/subject_train.txt',header=FALSE)
 subjectTest <- read.table('./test/subject_test.txt',header=FALSE)
